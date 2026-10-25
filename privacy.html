@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隐私政策 · Trello 卡片导出</title>
+<style>
+:root{--fg:#25231f;--muted:#6b6862;--line:#e6e3dc;--bg:#fbfaf7;--card:#fff;--accent:#534ab7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:56px 24px 96px}
+.eyebrow{color:var(--accent);font-size:13px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+h1{font-size:30px;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+.meta{color:var(--muted);font-size:14px;margin-bottom:36px}
+h2{font-size:18px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+p{margin:12px 0}
+ul{padding-left:22px;margin:12px 0}
+li{margin:5px 0}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:13px;background:#f7f6f2}
+code{background:#f4f2ec;padding:1px 5px;border-radius:4px;font-size:14px}
+.callout{background:#fff;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:16px 20px;margin:22px 0}
+.callout strong{font-weight:600}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+a{color:var(--accent)}
+@media(max-width:560px){.wrap{padding:36px 18px 64px}h1{font-size:24px}table{font-size:13.5px}th,td{padding:8px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Privacy Policy</div>
+  <h1>隐私政策</h1>
+  <div class="meta">Trello 卡片导出 · 最后更新 2026-10-25</div>
+
+  <div class="callout">
+    <strong>一句话：</strong>这个扩展只做一件事——把你自己的 Trello 数据下载到你自己的电脑上。
+    不收集、不上传、不分析、不分享任何数据。
+  </div>
+
+  <h2>收集哪些数据</h2>
+  <p><strong>不收集任何个人信息。</strong>扩展自身没有服务器，不存在把数据发出去的通道。</p>
+
+  <h2>数据存在哪里</h2>
+  <table>
+    <tr><th>数据</th><th>位置</th><th>说明</th></tr>
+    <tr><td>Trello 访问 token</td><td>浏览器本地（chrome.storage.local）</td><td>仅用于调用 Trello API，卸载扩展即清除</td></tr>
+    <tr><td>账号显示名、用户名</td><td>浏览器本地</td><td>仅用于在面板顶部显示「已连接：xxx」</td></tr>
+    <tr><td>导出的卡片与附件</td><td>你自己选择的文件夹</td><td>由你指定位置，扩展不保留副本</td></tr>
+  </table>
+
+  <h2>网络请求</h2>
+  <p>扩展只向以下地址发起请求，且全部由你的浏览器直接发起：</p>
+  <ul>
+    <li><code>https://trello.com/1/authorize</code> —— 授权页</li>
+    <li><code>https://api.trello.com/1/*</code> —— 读取你授权范围内的看板、卡片、清单</li>
+    <li><code>https://trello.com/*</code>、<code>https://trello-attachments.s3.amazonaws.com/*</code> —— 下载附件</li>
+  </ul>
+  <p>没有任何请求发往开发者或第三方。</p>
+
+  <h2>权限说明</h2>
+  <table>
+    <tr><th>权限</th><th>为什么需要</th></tr>
+    <tr><td><code>storage</code></td><td>在本地保存 token，免得每次导出都要重新授权</td></tr>
+    <tr><td><code>sidePanel</code></td><td>在浏览器侧边栏显示操作面板，不占用标签页</td></tr>
+    <tr><td><code>api.trello.com</code></td><td>读取卡片、看板、清单等数据</td></tr>
+    <tr><td><code>trello.com</code></td><td>打开授权页；下载附件（附件地址托管在此域下，否则会被 CORS 拦截）</td></tr>
+    <tr><td><code>trello-attachments.s3.amazonaws.com</code></td><td>部分历史附件仍托管在 Trello 的对象存储上</td></tr>
+    <tr><td><code>content_scripts</code><br>（仅 <code>trello.com/1/authorize*</code>）</td><td>你点完「允许」后，从页面上读出刚生成的 token 并自动回填，省掉复制粘贴</td></tr>
+    <tr><td>文件系统（运行时按需）</td><td>写文件到你选的文件夹，仅在导出时请求</td></tr>
+  </table>
+
+  <h2>关于页面脚本</h2>
+  <p>
+    扩展会在 Trello 授权完成后的那个页面上运行一小段脚本。它只做一件事：用正则扫描
+    64~80 位的十六进制串（也就是你刚生成的 token），然后回传给扩展保存。
+  </p>
+  <p>
+    它不读取、不修改、不上传页面上的其他任何内容。你正常浏览 Trello 其他页面时，
+    这段脚本完全不会注入。
+  </p>
+
+  <h2>只读</h2>
+  <p>
+    授权时只申请 <code>scope=read</code>。扩展在技术上无法创建、修改、删除你的任何卡片或看板。
+  </p>
+
+  <h2>第三方</h2>
+  <p>没有任何第三方分析、广告、埋点 SDK。</p>
+
+  <h2>撤销授权</h2>
+  <ul>
+    <li>扩展内点「断开连接」</li>
+    <li>或访问 <a href="https://trello.com/power-ups/admin" target="_blank" rel="noopener">Trello Power-Ups 管理</a> → 对应 Power-Up → Trello Auth → Revoke</li>
+    <li>或直接卸载扩展</li>
+  </ul>
+
+  <h2>联系方式</h2>
+  <p>如对隐私有疑问，可通过扩展详情页留下的联系方式反馈。</p>
+
+  <footer>
+    Trello 卡片导出 · 本页内容与扩展内 <code>PRIVACY.md</code> 一致。
+  </footer>
+</div>
+</body>
+</html>

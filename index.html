@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trello 卡片导出 · 把你的 Trello 数据真正拿到手里</title>
+<meta name="description" content="一键导出 Trello 工作区的全部卡片：正文、清单、评论、附件，生成可离线阅读的 HTML 与 Markdown。">
+<style>
+:root{--fg:#25231f;--muted:#6b6862;--line:#e6e3dc;--bg:#fbfaf7;--card:#fff;--accent:#534ab7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:72px 24px 96px}
+.hero{display:flex;align-items:center;gap:18px;margin-bottom:20px}
+.hero img{width:64px;height:64px;border-radius:14px}
+h1{font-size:32px;font-weight:600;margin:0;letter-spacing:-.02em}
+.tagline{font-size:18px;color:var(--muted);margin:0 0 32px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px}
+.btn{display:inline-block;padding:11px 22px;border-radius:9px;text-decoration:none;font-size:15px;border:1px solid transparent}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{border-color:var(--line);color:var(--fg);background:#fff}
+h2{font-size:19px;font-weight:600;margin:44px 0 14px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+p{margin:12px 0}
+ul{padding-left:22px}
+li{margin:6px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.tile b{display:block;font-weight:600;margin-bottom:4px;font-size:15px}
+.tile span{color:var(--muted);font-size:13.5px;line-height:1.6}
+pre{background:#f4f2ec;border:1px solid var(--line);border-radius:10px;padding:16px;overflow:auto;font-size:13.5px;line-height:1.7}
+code{background:#f4f2ec;padding:1px 5px;border-radius:4px;font-size:14px}
+.note{background:#fff;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:16px 20px;margin:22px 0;font-size:14.5px;color:var(--muted)}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+a{color:var(--accent)}
+@media(max-width:560px){.wrap{padding:44px 18px 64px}h1{font-size:25px}.tagline{font-size:16px}.hero img{width:52px;height:52px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <img src="icon.png" alt="Trello 卡片导出">
+    <h1>Trello 卡片导出</h1>
+  </div>
+  <p class="tagline">把你的 Trello 数据真正拿到手里。</p>
+
+  <div class="cta">
+    <a class="btn primary" href="https://chromewebstore.google.com/" target="_blank" rel="noopener">在 Chrome 商店安装</a>
+    <a class="btn ghost" href="privacy.html">隐私政策</a>
+  </div>
+
+  <div class="note">
+    Trello 官方的整站导出只对 Premium 工作区管理员开放。免费版用户只能一块板一块板手动导，
+    而且导出的 JSON 里附件只是一个链接——Trello 一删，附件就没了。
+    这个扩展补上这个缺口。
+  </div>
+
+  <h2>导出什么</h2>
+  <ul>
+    <li>卡片正文，原样保留 Markdown 格式</li>
+    <li>清单及每一条的勾选状态</li>
+    <li>标签、成员、截止日、归档状态、自定义字段</li>
+    <li>评论正文（可选）</li>
+    <li>附件原文件，图片 / PDF 等按看板分目录</li>
+  </ul>
+
+  <h2>三种产物</h2>
+  <div class="grid">
+    <div class="tile"><b>HTML</b><span>双击就能看，图片全部指向本地，断网也能读</span></div>
+    <div class="tile"><b>Markdown</b><span>丢进 Obsidian / Typora 继续编辑</span></div>
+    <div class="tile"><b>CSV / JSON</b><span>Excel 筛选，或用程序二次处理</span></div>
+  </div>
+
+  <h2>两个细节</h2>
+  <ul>
+    <li><strong>不用申请 API Key。</strong>点一次「连接 Trello」授权即可，全程只读权限。</li>
+    <li><strong>正文里的图片会本地化。</strong>Trello 卡片正文贴的图默认是需登录的外链，导出来是一堆打不开的链接；这里会把它们换成下载到本地的文件。</li>
+  </ul>
+
+  <h2>隐私</h2>
+  <p>
+    扩展没有服务器。Token 只存在你自己浏览器里，数据只在你机器上流转，不上传、不分析、不分享。
+    详见 <a href="privacy.html">隐私政策</a>。
+  </p>
+
+  <h2>安装（开发者模式）</h2>
+  <pre><code>1. 打开 chrome://extensions
+2. 右上角开启「开发者模式」
+3. 点「加载已解压的扩展程序」，选择扩展目录
+4. 点工具栏图标，在侧边栏面板里操作</code></pre>
+
+  <footer>
+    <span>© 2026 Trello 卡片导出</span>
+    <span><a href="privacy.html">隐私政策</a></span>
+  </footer>
+</div>
+</body>
+</html>
