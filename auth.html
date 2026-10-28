@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>授权完成 · Trello 卡片导出</title>
+<style>
+  :root{--fg:#25231f;--muted:#6b6862;--line:#e6e3dc;--bg:#fbfaf7;--accent:#534ab7;--ok:#1f7a4d;--bad:#b23a3a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:15px/1.7 -apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:56px 24px 80px}
+  h1{font-size:24px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13.5px;margin-bottom:28px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px;margin:16px 0}
+  .status{display:flex;align-items:center;gap:10px;font-weight:600;margin-bottom:14px}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .ok .dot{background:var(--ok)}
+  .bad .dot{background:var(--bad)}
+  .ok .status{color:var(--ok)}
+  .bad .status{color:var(--bad)}
+  .hint{color:var(--muted);font-size:13.5px;margin:10px 0 0}
+  .token-box{display:flex;gap:8px;margin-top:14px}
+  .token{
+    flex:1;min-width:0;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#f7f5f1;
+    word-break:break-all;user-select:all;max-height:150px;overflow:auto;
+  }
+  button{
+    font:inherit;font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:8px;
+    border:1px solid transparent;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap;
+  }
+  button:hover{filter:brightness(1.06)}
+  button.ghost{background:#fff;color:var(--fg);border-color:var(--line)}
+  button.ghost:hover{border-color:var(--accent);filter:none}
+  .steps{margin:14px 0 0;padding-left:20px;color:var(--muted);font-size:13.5px}
+  .steps li{margin:4px 0}
+  code{background:#f4f2ec;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .foot{margin-top:26px;color:var(--muted);font-size:12px;text-align:center}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trello 授权完成</h1>
+  <p class="sub">Trello 卡片导出 · 只读权限</p>
+
+  <!-- 成功 -->
+  <div class="card ok" id="ok-box" hidden>
+    <div class="status"><span class="dot"></span><span id="ok-title">已连接</span></div>
+    <p class="hint" id="ok-hint">
+      扩展已经拿到授权。<b>现在可以关闭这个标签页</b>，回到扩展面板即可开始导出。
+    </p>
+    <p class="hint" id="manual-hint" hidden>
+      没能自动回填？复制下面这串 token，粘贴到扩展面板的输入框里，点「保存」。
+    </p>
+
+    <!-- 这一块同时给扩展的 content script 读（data-token 是精确钩子，不依赖文案结构） -->
+    <div class="token-box">
+      <div class="token" id="token-value" data-token=""></div>
+      <button id="btn-copy" class="ghost">复制</button>
+    </div>
+    <ol class="steps">
+      <li>token 等同于密码，不要发到聊天群或截图分享</li>
+      <li>有效期设为永久，以后不用重复授权</li>
+      <li>想撤销：Trello 后台 → 我的账号 → Applications → Revoke</li>
+    </ol>
+  </div>
+
+  <!-- 失败 -->
+  <div class="card bad" id="bad-box" hidden>
+    <div class="status"><span class="dot"></span><span id="bad-title">授权没有完成</span></div>
+    <p class="hint" id="bad-reason"></p>
+    <p class="hint">
+      回到扩展面板，点「重新打开授权页」再试一次。如果反复失败，可以用面板里的手动方式：
+      在授权页点「允许」后，直接把页面上显示的 token 复制粘贴过去。
+    </p>
+  </div>
+
+  <p class="foot">
+    <a href="./" style="color:var(--accent);text-decoration:none">Trello 卡片导出</a> ·
+    本页在浏览器本地运行，token 不会发送到任何服务器
+  </p>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const hash = (location.hash || '').replace(/^#/, '');
+  const params = new URLSearchParams(hash);
+  // 兼容 Trello 把 token 放在 query 里的情况
+  const qs = new URLSearchParams(location.search);
+  const token = params.get('token') || qs.get('token') || '';
+  const error = params.get('error') || qs.get('error') || '';
+
+  if (token) {
+    $('ok-box').hidden = false;
+    const box = $('token-value');
+    box.textContent = token;
+    box.dataset.token = token;
+
+    // 如果 8 秒内扩展没有回应，提示手动复制
+    const fallback = setTimeout(() => { $('manual-hint').hidden = false; }, 8000);
+    // 扩展的 content script 回填成功后会写这个标记
+    window.__TRELLO_EXPORT_CAPTURED__ = () => {
+      clearTimeout(fallback);
+      $('ok-title').textContent = '已自动连接到扩展';
+    };
+
+    $('btn-copy').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(token);
+        $('btn-copy').textContent = '已复制';
+        setTimeout(() => { $('btn-copy').textContent = '复制'; }, 1800);
+      } catch {
+        // 剪贴板被拒时选中文本，让用户 Cmd+C
+        const r = document.createRange();
+        r.selectNodeContents(box);
+        const sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        $('btn-copy').textContent = '请按 ⌘C';
+      }
+    });
+  } else {
+    $('bad-box').hidden = false;
+    const map = {
+      access_denied: '你在 Trello 页面上点了「拒绝」。',
+      invalid_request: 'Trello 认为这个请求不合法，可能是 API Key 或回调地址配置有误。',
+    };
+    $('bad-reason').textContent =
+      map[error] || (error ? '错误信息：' + error : '没有收到 token，可能是链接不完整或已过期。');
+  }
+})();
+</script>
+</body>
+</html>
